@@ -21,6 +21,7 @@ import os
 import glob
 import math
 import random
+import numpy as np
 
 from collections import namedtuple
 from settings import *
@@ -67,7 +68,7 @@ def load_viewpoints(viewpoint_file_list):
     for vp_file in vp_file_list:
         yield load_viewpoint(vp_file) 
     
-def load_object_lists(category=None):
+def load_object_lists():
     """
         load object pathes according to the given category
 
@@ -78,23 +79,10 @@ def load_object_lists(category=None):
     Returns:
         generator of gnerators of obj file pathes
     """
-    
-    #type checking
-    if not category:
-        category = g_render_objs
-    elif isinstance(category, str):
-        category = [category]
-    else:
-        try:
-            iter(category)
-        except TypeError:
-            print("category should be an iterable object")
 
     #load obj file path
-    for cat in category:
-        num = g_shapenet_categlory_pair[cat]
-        search_path = os.path.join(g_shapenet_path, num, '**','*.obj')
-        yield glob.iglob(search_path, recursive=True)
+    search_path = os.path.join(g_shapenet_path, '**','model.obj')
+    return glob.iglob(search_path, recursive=True)
 
 def camera_location(azimuth, elevation, dist):
     """get camera_location (x, y, z)
@@ -165,46 +153,45 @@ def random_sample_objs(num_per_cat):
             obj file path
     """
 
-    obj_path_lists = load_object_lists(g_render_objs)
+    obj_path_lists = list(load_object_lists())
+    # obj_path_lists = [*obj_path_lists]
     obj_path_dict = {}
 
-    for cat, pathes in zip(g_render_objs, obj_path_lists):
-        pathes = list(pathes)
-        random.shuffle(pathes)
-        samples = random.sample(pathes, num_per_cat)
-        obj_path_dict[cat] = samples
+    paths = random.sample(obj_path_lists, num_per_cat)
+
+    for path in paths:
+        obj_id = path.replace(g_shapenet_path+"\\","").replace("\\model.obj","")
+        obj_path_dict[obj_id] = path
     
     return obj_path_dict
     
-def random_sample_vps(obj_path_dict, num_per_model):
+def random_sample_vps(obj_path_dict, num_vp_per_obj):
     """randomly sample vps from vp lists, for each model,
-    we sample num_per_cat number vps, and save the result to
+    we sample num_vp_per_obj number vps, and save the result to
     g_vps
     Args:
-        obj_pathes: result of function random_sample_objs, 
+        obj_path_dict: result of function random_sample_objs, 
                     contains obj file pathes
-        num_per_cat: how many view point to sample per model 
+        num_vp_per_obj: how many view point to sample per model 
     
     Returns:
         result_dict: a dictionary contains model name and its corresponding
              viewpoints
     """
 
-    vp_file_lists = [g_view_point_file[name] for name in g_render_objs]
-    viewpoint_lists = load_viewpoints(vp_file_lists)
-
-    obj_file_pathes = [obj_path_dict[name] for name in g_render_objs]
-
     result_dict = {}
-    for cat, pathes, vps in zip(g_render_objs, obj_file_pathes, viewpoint_lists):
-        vps = list(vps)
-        random.shuffle(vps)
-        models = []
-        for p in pathes: 
-            samples = random.sample(vps, num_per_model)
-            models.append(Model(p, samples))
-            
-        result_dict[cat] = models
+    for obj_id in obj_path_dict:
+        path = obj_path_dict[obj_id]
+
+        samples = []
+
+        for _ in range(num_vp_per_obj):
+            azimuth = np.random.uniform(0,360)
+            elevation = np.random.uniform(30,45)
+            samples.append(VP(azimuth,elevation,0,1))
+
+        result_dict[obj_id] = Model(path, samples)
+        
     return result_dict 
 
 def random_sample_objs_and_vps(model_num_per_cat, vp_num_per_model):

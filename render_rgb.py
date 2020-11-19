@@ -182,8 +182,39 @@ def init_all():
     cam_obj = bpy.data.objects['Camera']
     cam_obj.rotation_mode = g_rotation_mode
 
-    bpy.data.objects['Lamp'].data.energy = 50
+    # Set background to white
+    bpy.data.worlds['World'].horizon_color = [1,1,1]
+    bpy.data.worlds['World'].horizon_color = [1,1,1]
+
+    bpy.data.objects['Lamp'].data.energy = 0.5
+    bpy.data.lamps['Lamp'].type = 'SUN'
+    bpy.data.lamps['Lamp'].shadow_method = 'NOSHADOW'
+    bpy.data.lamps['Lamp'].use_specular = False
+    bpy.data.objects['Lamp'].rotation_euler[0] = np.radians(180)
+    bpy.data.objects['Lamp'].rotation_euler[1] = 0
+    bpy.data.objects['Lamp'].rotation_euler[2] = 0
+
+
     bpy.ops.object.lamp_add(type='SUN')
+    # Make light just directional, disable shadows.
+    bpy.data.lamps['Sun'].shadow_method = 'NOSHADOW'
+    bpy.data.objects['Sun'].data.energy = 0.5
+    # Possibly disable specular shading:
+    bpy.data.lamps['Sun'].use_specular = False
+    bpy.data.objects['Sun'].rotation_euler[0] = np.radians(-180)
+    bpy.data.objects['Sun'].rotation_euler[1] = 0
+    bpy.data.objects['Sun'].rotation_euler[2] = 0
+
+    bpy.context.scene.update()
+
+
+    # input(bpy.data.lamps.keys())
+    # for key in bpy.data.lamps.keys():
+    #     input(bpy.data.objects[key].rotation_euler)
+
+    # input(bpy.data.lamps.keys())
+
+    
 
 def set_image_path(new_path):
     """ set image output path to new_path
@@ -232,19 +263,15 @@ def scale_objects(scale_factor):
 ### YOU CAN WRITE YOUR OWN IMPLEMENTATION TO GENERATE DATA
 
 init_all()
-
 result_dict = pickle.load(open(os.path.join(g_temp, g_result_dict), 'rb'))
-result_list = [result_dict[name] for name in g_render_objs]
 
-for obj_name, models in zip(g_render_objs, result_list):
-    obj_folder = os.path.join(g_syn_rgb_folder, obj_name)
+for obj_id in result_dict:
+    obj_folder = os.path.join(g_syn_rgb_folder, obj_id)
     if not os.path.exists(obj_folder):
         os.makedirs(obj_folder)
     
-    for model in models:
-        clear_mesh()
-        bpy.ops.import_scene.obj(filepath=model.path)
-        #combine_objects()
-        #scale_objects(0.5)
-        set_image_path(obj_folder)
-        render_obj_by_vp_lists(model.path, model.vps)
+    model = result_dict[obj_id]
+    clear_mesh()
+    bpy.ops.import_scene.obj(filepath=model.path)
+    set_image_path(obj_folder)
+    render_obj_by_vp_lists(model.path, model.vps)

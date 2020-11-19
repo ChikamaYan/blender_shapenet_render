@@ -237,19 +237,15 @@ def scale_objects(scale_factor):
 ### YOU CAN WRITE YOUR OWN IMPLEMENTATION TO GENERATE DATA
 
 init_all()
-
 result_dict = pickle.load(open(os.path.join(g_temp, g_result_dict), 'rb'))
-result_list = [result_dict[name] for name in g_render_objs]
 
-for obj_name, models in zip(g_render_objs, result_list):
-    obj_folder = os.path.join(g_syn_depth_folder, obj_name)
+for obj_id in result_dict:
+    obj_folder = os.path.join(g_syn_depth_folder, obj_id)
     if not os.path.exists(obj_folder):
         os.makedirs(obj_folder)
     
-    for model in models:
-        clear_mesh()
-        bpy.ops.import_scene.obj(filepath=model.path)
-        #combine_objects()
-        #scale_objects(0.5)
-        set_depth_path(obj_folder)
-        render_depth_by_vp_lists(model.path, model.vps)
+    model = result_dict[obj_id]
+    clear_mesh()
+    bpy.ops.import_scene.obj(filepath=model.path)
+    set_depth_path(obj_folder)
+    render_depth_by_vp_lists(model.path, model.vps)

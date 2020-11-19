@@ -42,17 +42,35 @@ def render(pose_folder, viewpoint):
     bpy.data.objects['Camera'].rotation_mode = 'QUATERNION'
     q = bpy.data.objects['Camera'].rotation_quaternion
 
-    m = np.array(
+    bpy.context.scene.update()
+
+    # https://www.ranjithraghunathan.com/blender-coordinate-system-to-opengl/
+
+    n = np.array(
     [[1-2*q[2]*q[2]-2*q[3]*q[3], 2*q[1]*q[2]-2*q[0]*q[3],   2*q[1]*q[3]+2*q[0]*q[2],   cam_location[0]], 
      [2*q[1]*q[2]+2*q[0]*q[3],   1-2*q[1]*q[1]-2*q[3]*q[3], 2*q[2]*q[3]-2*q[0]*q[1],   cam_location[1]],
      [2*q[1]*q[3]-2*q[0]*q[2],   2*q[2]*q[3]+2*q[0]*q[1],   1-2*q[1]*q[1]-2*q[2]*q[2], cam_location[2]],
      [0,                         0,                         0,                         1]])
+
+    np.set_printoptions(suppress=True)
+
+    cam = bpy.data.objects['Camera']
+    location, rotation = cam.matrix_world.decompose()[0:2]
+    R_bcam2w = rotation.to_matrix()
+    m = np.hstack((R_bcam2w, np.transpose([np.array(location)])))
+    m = np.concatenate([m,[[0,0,0,1]]])
+
+    # print("cam_location is {}".format(cam_location))
+    # print("a,e,t is {}".format([vp.azimuth, vp.elevation, vp.tilt]))
+    # print("cam_rot is {}".format(cam_rot))
+    # print("m is {}".format(m))
+    # input()
         
     if not os.path.exists(g_syn_pose_folder):
         os.mkdir(g_syn_pose_folder)
 
     current_frame = bpy.context.scene.frame_current
-    np.savetxt(os.path.join(pose_folder, 'blender-{:06}.pose.txt'.format(current_frame)), m)
+    np.savetxt(os.path.join(pose_folder, 'blender-{0:06}.pose.txt'.format(current_frame)), m)
     bpy.context.scene.frame_set(current_frame + 1)
 
 def render_pose_by_vp_lists(pose_folder, viewpoints):
@@ -77,13 +95,11 @@ def render_pose_by_vp_lists(pose_folder, viewpoints):
 ### YOU CAN WRITE YOUR OWN IMPLEMENTATION TO GENERATE DATA
 
 result_dict = pickle.load(open(os.path.join(g_temp, g_result_dict), 'rb'))
-result_list = [result_dict[name] for name in g_render_objs]
-
-for obj_name, models in zip(g_render_objs, result_list):
-    obj_folder = os.path.join(g_syn_pose_folder, obj_name)
+for obj_id in result_dict:
+    obj_folder = os.path.join(g_syn_pose_folder, obj_id)
     if not os.path.exists(obj_folder):
         os.makedirs(obj_folder)
-    
-    for model in models:
-        render_pose_by_vp_lists(obj_folder, model.vps)
+
+    model = result_dict[obj_id]
+    render_pose_by_vp_lists(obj_folder, model.vps)
         
