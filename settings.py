@@ -9,27 +9,17 @@ import os
 g_shapenet_path = os.path.join('.','objs','02958343')
 g_blender_excutable_path = os.path.join('C:/Program Files','Blender Foundation','Blender','blender.exe')
 
-#if you have multiple viewpoint files, add to the dict
-#files contains azimuth,elevation,tilt angles and distance for each row
-# g_view_point_file ={
-#     'chair' : 'view_points/chair.txt',
-#     'bottle' : 'view_points/bottle.txt',
-#     'table' : 'view_points/diningtable.txt',
-#     'sofa' : 'view_points/sofa  .txt',
-#     'bed' : 'view_points/bed.txt',
-#     'car' : 'view_points/car.txt'
-# }
 
-# g_render_objs = ['car']
+workspace_path = os.path.join('C:/nonsys','ucl','summer-intern','blender_shapenet_render')
 
 #change this path to your background image folder
-g_background_image_path = os.path.join('C:/nonsys','ucl','summer-intern','blender_shapenet_render','background_image')
+g_background_image_path = os.path.join(workspace_path,'background_image')
 
 #folders to store synthetic data
-g_syn_rgb_folder = os.path.join('C:/nonsys','ucl','summer-intern','blender_shapenet_render','out','syn_rgb')
-g_syn_depth_folder = os.path.join('C:/nonsys','ucl','summer-intern','blender_shapenet_render','out','syn_depth')
-g_syn_pose_folder = os.path.join('C:/nonsys','ucl','summer-intern','blender_shapenet_render','out','syn_pose')
-g_temp = os.path.join('C:/nonsys','ucl','summer-intern','blender_shapenet_render','out','tmp_data')
+g_syn_rgb_folder = os.path.join(workspace_path,'out','syn_rgb')
+g_syn_depth_folder = os.path.join(workspace_path,'out','syn_depth')
+g_syn_pose_folder = os.path.join(workspace_path,'out','syn_pose')
+g_temp = os.path.join(workspace_path,'out','tmp_data')
 g_result_dict = 'result.p'
 
 #background image composite
@@ -64,8 +54,8 @@ g_depth_use_file_extension = True
 g_engine_type = 'BLENDER_RENDER'
 
 #output image size =  (g_resolution_x * resolution_percentage%, g_resolution_y * resolution_percentage%)
-g_resolution_x = 200
-g_resolution_y = 200
+g_resolution_x = 128
+g_resolution_y = 128
 g_resolution_percentage = 100
 
 
