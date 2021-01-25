@@ -186,8 +186,13 @@ def random_sample_vps(obj_path_dict, num_vp_per_obj):
         samples = []
 
         for _ in range(num_vp_per_obj):
+            # # this is variety setting
+            # azimuth = np.random.uniform(0,360)
+            # elevation = np.random.uniform(-30,90)
+            # dist = np.random.uniform(0.8,2)
+
             azimuth = np.random.uniform(0,360)
-            elevation = np.random.uniform(30,45)
+            elevation = np.random.uniform(15,60)
             samples.append(VP(azimuth,elevation,0,1))
 
         result_dict[obj_id] = Model(path, samples)

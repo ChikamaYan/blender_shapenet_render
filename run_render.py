@@ -12,8 +12,8 @@ import numpy as np
 from render_helper import *
 from settings import *
 
-OBJ_NUM = 1
-VP_NUM = 30
+OBJ_NUM = 5
+VP_NUM = 5
 
 
 if __name__ == '__main__':

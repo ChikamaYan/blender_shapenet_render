@@ -1,7 +1,7 @@
 __pycache__
 objs
 out
-objs_backups
+objs_backups/
 .vscode
 background_image
 view_points
